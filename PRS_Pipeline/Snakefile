@@ -1,0 +1,79 @@
+rule FixMisMatch:
+	input:
+		base="/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
+	params:
+		outputfile="/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/ROutput/nomismatch.{taxa}"
+	output:
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/ROutput/nomismatch.{taxa}_plink-format.tsv"
+	shell:
+		"Rscript FixMisMatchSNP.R"
+		" -t '/home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37/final-qc/canbind-qc'"
+		" -b {input.base}" 
+		" -o {params.outputfile} -l '/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/log.txt'"
+
+rule SetA1:
+	input: 
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/ROutput/nomismatch.{taxa}_plink-format.tsv"
+	output: 
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.bim"
+	shell:
+		"plink"
+		" --bfile /home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37/final-qc/canbind-qc"
+		" --update-alleles /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/ROutput/nomismatch.{wildcards.taxa}_plink-format.tsv"
+		" --make-bed"
+		" --out /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{wildcards.taxa}"
+
+rule clump: 
+	input: 
+		Target = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.bim",
+		BaseSummaryStats = "/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
+	output: 
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.clumped"
+	shell:
+		"plink"
+		" --bfile /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{wildcards.taxa}"
+		" --clump-p1 1 --clump-r2 0.1 --clump-kb 250 --clump {input.BaseSummaryStats} --clump-snp-field rsID --clump-field P.weightedSumZ"
+		" --out /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{wildcards.taxa}"
+
+rule ExtractClumpedSNPs: 
+	input: 
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.clumped"
+	output: 
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.clumpedSNPs"
+	shell:
+		"awk 'NR!=1{{print $3}}' {input} > {output}"
+
+rule ExtractBasePValue:
+	input:
+		base = "/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
+	output: 
+		temp("/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/tmp/{taxa}.pvalue")
+	shell:
+		"zcat {input.base} | awk 'NR!=1{{print$4, $10}}' > {output}"
+
+rule scorefile:
+	input:
+		base = "/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
+	output:
+		temp("/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/tmp/{taxa}.score")
+	shell:
+		"zcat {input.base} | awk 'NR!=1{{print$4, $6, $7}}' > {output}"
+
+
+rule plinkPRS:
+	input:
+		target = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.bim",
+		clumpedSNPs = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.clumpedSNPs",
+		score = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/tmp/{taxa}.score",
+		basepvalue = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/tmp/{taxa}.pvalue"
+	output:
+		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/prs/canbind-qc-{taxa}.PRS0.1.profile"
+	shell:
+		"""
+		plink \
+			--bfile /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{wildcards.taxa} \
+			--score {input.score} \
+			--q-score-range /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/range_list {input.basepvalue} \
+			--extract {input.clumpedSNPs} \
+			--out /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/prs/canbind-qc-{wildcards.taxa}
+		"""

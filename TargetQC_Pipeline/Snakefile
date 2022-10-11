@@ -1,0 +1,70 @@
+## Standard GWAS QC
+## Remove: MAF > 0.01, HWE 1E-6, Individuals with >1% missingness, SNPs with >1% missingness 
+rule gwasQC: 
+	input: 
+		"GRCh37-canbind-noqc.bed"
+	output: 
+		"GRCh37-canbind-qc.fam"
+	shell:
+		"plink --bfile GRCh37-canbind-noqc --maf 0.01 --hwe 1e-6 --geno 0.01 --mind 0.01 --write-snplist --make-just-fam --out GRCh37-canbind-qc"
+
+## Heterozygosity I
+## Identify sample SNP heterozygosity rate
+rule HeterozygosityCalculation:
+	input: 
+		"GRCh37-canbind-qc.fam"
+	output:	
+		"GRCh37-canbind-qc.het"
+	shell:
+		"plink --bfile GRCh37-canbind-noqc --keep GRCh37-canbind-qc.fam --extract GRCh37-canbind-qc.snplist --het --out GRCh37-canbind-qc"
+
+## Heterozygosity II
+## Remove samples with high or low heterozygosity (high likelihood of DNA contamination)(remove >3 SD from mean F-coefficient - relatedeness meaasure)
+## Dependency: R file HetSampleFilter.R
+rule HeterozygosityFilter:
+	input: 
+		"GRCh37-canbind-qc.het"
+	output: 
+		"het.valid.samples"
+	shell:
+		"Rscript HetSampleFilter.R "
+		"-f /home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37-run2/{input} "
+		"-e /home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37-run2"
+
+## Duplicated SNPs
+## 1. Remove SNPs with the same location but different IDs 
+## 2. Then remove SNPs with the same ID but different location
+rule DuplicatedSNPs:
+	input:
+		"het.valid.samples"
+	output:
+		"GRCh37-canbind-qc-nodup.snplist"
+	shell:
+		"""
+		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc.snplist --list-duplicate-vars suppress-first
+		cut -f4 plink.dupvar | cut -f1 -d" " > Duplicates.Bylocation.list
+		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc.snplist --exclude Duplicates.Bylocation.list --write-snplist --out GRCh37-canbind-qc-nodup
+		cut -f 2 GRCh37-canbind-noqc.bim | sort | uniq -d > Duplicates.ByID.list
+		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc-nodup.snplist --exclude Duplicates.ByID.list --write-snplist --out GRCh37-canbind-qc-nodup
+		"""
+
+## Relatedeness
+## Remove genetically related (>0.125) samples. 
+rule RemoveRelated:
+	input:
+		"GRCh37-canbind-qc-nodup.snplist"
+	output: 
+		"GRCh37-canbind-qc.rel.id"
+	shell:
+		"plink --bfile GRCh37-canbind-noqc --extract GRCh37-canbind-qc-nodup.snplist --keep het.valid.samples --rel-cutoff 0.125 --out GRCh37-canbind-qc"
+
+## Finalize QC
+## Make PLINK bed format from QC'ed data
+rule FinalizeQC: 
+	input: 
+		"GRCh37-canbind-qc.rel.id"
+	output:
+		"canbind-qc.bed"
+	shell:
+		"plink --bfile GRCh37-canbind-noqc --make-bed --keep GRCh37-canbind-qc.rel.id --extract GRCh37-canbind-qc-nodup.snplist --out canbind-qc"
+
