@@ -59,8 +59,9 @@ R<br/>
 
 
 ### Edit Snakefile Rules
-1. For all rules, **replace GRCh37-canbind-noqc** with the prefix of the input target database. It is suggested to retain the -noqc suffix to indicate these are the raw files. 
-2. For all rules, **replace GRCh37-canbind-qc** with the prefix of the input target database. It is suggested to retain the -qc suffix to indicate that these are files used in the qc pipeline. 
+**For all rules: **
+1.Replace **GRCh37-canbind-noqc** with the prefix of the input target database. It is suggested to retain the -noqc suffix to indicate these are the raw files. 
+2. Replace **GRCh37-canbind-qc** with the prefix of the input target database. It is suggested to retain the -qc suffix to indicate that these are files used in the qc pipeline. 
 
 Specific Snakefile rules require additional edits. 
 
@@ -75,12 +76,57 @@ Specific Snakefile rules require additional edits.
 ## PRS Pipeline Instructions
 ### Preparation 
 1. Create a directory named plink-prs
-2. Create a plink-prs subdirectory named PipelineFiles
+2. Add the PRS pipeline Snakefile and FixMisMatchSNP.R to plink-prs 
+3. Create a plink-prs subdirectory named PipelineFiles
+4. Add range_list to PipelineFiles
+5. Create a PipelineFiles subdirectory named bed
+6. Create a PipelineFiles subdirectory named prs
+7. Create a PipelineFiles subdirectory named MismatchFixed
+8. Create a MismatchFixed subdirectory named ROutput
+
 
 ### Edit Snakefile Rules 
-#### FixMisMatch
-- Change input base file path to location of Kurilshikov summary statistics 
+**For all rules:**
+1. Replace **/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable** with the directory path for the cleaned base data summary statistics
+2. Replace **/home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37/final-qc/canbind-qc** with the directory of the target database. Additionally, replace canbind-qc wih the new prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
+3. Replace **/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc** with the directory path for the plink-prs/PipelineFiles/bed directory. Additionally, replace canbind-qc wih the new prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
+4. Replace **/home/fosterlab/SA/GWAS/prs/plink-prs** with the directory path for the plink-prs directory. 
+
+**Note**
+> If edits are executed in the given order, Find and Replace and be used. 
 
 
+## Running Snakefiles
+
+### TargetQC Pipeline
+```
+mamba activate prsenv #actiavte your environment containing Snakemake
+cd ~/SA/GWAS/canbind/CBN_GWAS_files/GRCh37-run2 #change to directory containing Snakefile
+snakemake --cores 1 canbind-qc.bed #run Snakefile
+```
+#### User Edits
+- replace ~/SA/GWAS/canbind/CBN_GWAS_files/GRCh37-run2 with the directory path for TargetQC Snakefile and raw target genome data
+- replace canbind-qc of canbind-qc.bed with the new QC'ed target database prefix created in the TargetQC pipeline Rule: FinalizeQC
 
 
+### PRS Pipeline
+The PRS pipeline snakefile can be run in parallel for all 25 heritable taxa.
+```
+mamba activate prsenv #actiavte your environment containing Snakemake
+cd /home/fosterlab/SA/GWAS/prs/plink-prs-run2 #change to directory containing Snakefile
+cat ~/SA/GWAS/Kurilshikov/heritability_files/heritable.taxa.names | parallel -j 10 snakemake --cores 1 /home/fosterlab/SA/GWAS/prs/plink-prs-run2/PipelineFiles/prs/canbind-qc-{}.PRS0.1.profile #Run Snakefile parallel inputing 25 heritable taxa names as wildcard. Output PRS files.
+```
+#### User Edits
+- /home/fosterlab/SA/GWAS/prs/plink-prs-run2 should be replaced with the path for the plink-prs directory
+- ~/SA/GWAS/Kurilshikov/heritability_files/heritable.taxa.names should be replaced with the path to a file containing the names of all 25 heritable taxa (heritable.taxa.names file provided in PRS_Pipeline)
+- canbind-qc of canbind-qc-{}.PRS0.1.profile{} should be replaced with the new QC'ed target database prefix created in the TargetQC pipeline Rule: FinalizeQC
+
+### PRS Sample Matrix
+Once polygenic risk scores have been calculated for all 25 taxa, a matrix can be created. An example is given below: 
+``` 
+cd /home/fosterlab/SA/GWAS/prs/plink-prs-run2/PipelineFiles/prs #change to directory containing PRS files output from PRS pipeline.
+find *.profile | xargs -I input awk 'NR!=1 {print "input", $0}' input | sed '1i FILE FID IID PHENO CNT CNT2 SCORE' > canbind-prs-run2.tsv
+```
+#### User Edits
+- /home/fosterlab/SA/GWAS/prs/plink-prs-run2 should be replaced with the path for the plink-prs directory
+- - canbind-prs-run2.tsv should be replaced with the desired name of the PRS sample matrix.
