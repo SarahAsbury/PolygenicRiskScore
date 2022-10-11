@@ -1,3 +1,5 @@
+##Fix Mismatched SNPS 
+##SNPs are recoded, strand flipped, or both to ensure SNPs match between target and base data. SNPs that cannot be matched as discarded.
 rule FixMisMatch:
 	input:
 		base="/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
@@ -11,6 +13,8 @@ rule FixMisMatch:
 		" -b {input.base}" 
 		" -o {params.outputfile} -l '/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/log.txt'"
 
+##Set Allele 1
+##Update target genome files with matched SNPs
 rule SetA1:
 	input: 
 		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/MismatchFixed/ROutput/nomismatch.{taxa}_plink-format.tsv"
@@ -23,6 +27,8 @@ rule SetA1:
 		" --make-bed"
 		" --out /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{wildcards.taxa}"
 
+##Clump SNPs
+## Clump all SNPs present in both target and base data with linkage disequilibrum r2 >0.1 within 250kb 
 rule clump: 
 	input: 
 		Target = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.bim",
@@ -35,6 +41,8 @@ rule clump:
 		" --clump-p1 1 --clump-r2 0.1 --clump-kb 250 --clump {input.BaseSummaryStats} --clump-snp-field rsID --clump-field P.weightedSumZ"
 		" --out /home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{wildcards.taxa}"
 
+##Extract clumped SNPs
+##Creates text file containing list of clumped SNP IDs 
 rule ExtractClumpedSNPs: 
 	input: 
 		"/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.clumped"
@@ -43,6 +51,8 @@ rule ExtractClumpedSNPs:
 	shell:
 		"awk 'NR!=1{{print $3}}' {input} > {output}"
 
+##Extract base data SNP p-value
+##Temporarily stores SNP ID (column 4) and  meta-analysis p-values of SNP-trait associations (column 10; i.e. SNP-microbe significance)
 rule ExtractBasePValue:
 	input:
 		base = "/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
@@ -51,6 +61,8 @@ rule ExtractBasePValue:
 	shell:
 		"zcat {input.base} | awk 'NR!=1{{print$4, $10}}' > {output}"
 
+##Extract base data SNP betas
+##Temporarily stores SNP ID (column 4), effector allele (column 6) and beta (column 7
 rule scorefile:
 	input:
 		base = "/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{taxa}.summary.txt.gz"
@@ -59,7 +71,8 @@ rule scorefile:
 	shell:
 		"zcat {input.base} | awk 'NR!=1{{print$4, $6, $7}}' > {output}"
 
-
+##Calculate PRS 
+##Import target data, SNP list (clumped), and SNP beta/p-values for microbe-trait assocations. Calculate PRS using all SNPs with p-value >0.1 (threshold value stored in q-score-range file). 
 rule plinkPRS:
 	input:
 		target = "/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc-{taxa}.bim",
