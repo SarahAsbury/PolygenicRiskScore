@@ -17,8 +17,9 @@ Snakemake is a workflow management system designed for bioinformatics analyses. 
 
 First use the TargetQC snakemake pipeline to peform GWAS quality control steps on raw target genome data. The TargetQC snakefile requires HetSampleFilter.R script to run sucessfully, and will output the clean target data. 
 
-The clean heritable mbGWAS base data summary staistics (provided separately) and clean target genome data can then be input into the PRS snakemake pipeline. The PRS snakefile requires the range_list text file and FixMisMatchSNP.R script to run successfully. The range_list file states the p-value threshold used to filter which SNPs are used to calculate the microbial PRS. Currently, the p-value threshold is arbritarily set to discovery threshold of 0.1, however future pipeline iterations that use PRSice2 or other methods to select the optimal p-value threhsold may change this. The PRS snakefile will output the polygenic risk scores for the input taxon summary statistics as a file with the suffix .PRS0.1.profile. These files can be formatted into a poylgenic risk score sample matrix using unix. 
+**Warning** Failure to run the target data through the TargetQC pipeline will likely cause custom mismatch repair R scripts to fail in the PRS pipeline. 
 
+Next, input the clean heritable mbGWAS base data summary statistics (provided separately) and clean target genome data to the PRS snakemake pipeline. The PRS snakefile requires the range_list text file and FixMisMatchSNP.R script to run successfully. The range_list file states the p-value threshold used to filter which SNPs are used to calculate the microbial PRS. Currently, the p-value threshold is arbritarily set to discovery threshold of 0.1, however future pipeline iterations that use PRSice2 or other methods to select the optimal p-value threhsold may change this. The PRS snakefile will output sample polygenic risk scores in a file containig the microbial taxon name and .PRS0.1.profile suffix. 
 
 ## Required Data, Files, and Dependencies
 
@@ -40,7 +41,10 @@ The clean heritable mbGWAS base data summary staistics (provided separately) and
 - [ ] FixMisMatchSNP R script
 - [ ] range_list text file
 
-## TargetQC Pipeline 
+## TargetQC Pipeline Instructions
+
+
+## 
 
 
 
