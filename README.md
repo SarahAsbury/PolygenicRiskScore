@@ -121,7 +121,7 @@ cat ~/SA/GWAS/Kurilshikov/heritability_files/heritable.taxa.names | parallel -j 
 - ~/SA/GWAS/Kurilshikov/heritability_files/heritable.taxa.names should be replaced with the path to a file containing the names of all 25 heritable taxa (heritable.taxa.names file provided in PRS_Pipeline)
 - canbind-qc of canbind-qc-{}.PRS0.1.profile{} should be replaced with the new QC'ed target database prefix created in the TargetQC pipeline Rule: FinalizeQC
 
-### PRS Sample Matrix
+## PRS Sample Matrix
 Once polygenic risk scores have been calculated for all 25 taxa, a matrix can be created. An example is given below: 
 ``` 
 cd /home/fosterlab/SA/GWAS/prs/plink-prs-run2/PipelineFiles/prs #change to directory containing PRS files output from PRS pipeline.
@@ -129,4 +129,4 @@ find *.profile | xargs -I input awk 'NR!=1 {print "input", $0}' input | sed '1i 
 ```
 #### User Edits
 - /home/fosterlab/SA/GWAS/prs/plink-prs-run2 should be replaced with the path for the plink-prs directory
-- - canbind-prs-run2.tsv should be replaced with the desired name of the PRS sample matrix.
+- canbind-prs-run2.tsv should be replaced with the desired name of the PRS sample matrix.
