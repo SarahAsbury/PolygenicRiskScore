@@ -9,8 +9,27 @@ Snakemake is a workflow management system designed for bioinformatics analyses. 
 ## Pipeline Overview
 ![Pipline overview flowchart](Images/pipeline_overview.png)
 
-**Orange** = Accessory files 
+**Orange** = Accessory files
 **Pink** = Target data
 **Blue** = Base data
 **Green** = Polygenic Risk Score
+
+## Required Data and Files
+
+### Data
+- [ ] Raw target genome data in PLINK bim/bed/fam format
+- [ ] Cleaned base data summary statistics stored as compressed text files (.txt.gz)_(i.e. quality-controlled heritable taxa summary statistics from Kurilshikov mbGWAS)__
+
+### TargetQC Pipline Files
+- [ ] TargetQC Pipeline Snakefile
+- [ ] HetSampleFilter R script
+
+### PRS Pipline Files
+- [ ] PRS Pipeline Snakefile
+- [ ] FixMisMatchSNP R script
+- [ ] range_list text file
+
+
+
+
 
