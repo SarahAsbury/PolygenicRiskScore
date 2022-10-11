@@ -13,14 +13,19 @@ Snakemake is a workflow management system designed for bioinformatics analyses. 
 **Blue** = Base data
 **Green** = Polygenic Risk Score
 <br/>
+<br/>
 
 First use the TargetQC snakemake pipeline to peform GWAS quality control steps on raw target genome data. The TargetQC snakefile requires HetSampleFilter.R script to run sucessfully, and will output the clean target data. 
 
 Next, input the clean heritable mbGWAS base data summary statistics (provided separately) and clean target genome data to the PRS snakemake pipeline. The PRS snakefile requires the range_list text file and FixMisMatchSNP.R script to run successfully. The range_list file states the p-value threshold used to filter which SNPs are used to calculate the microbial PRS. Currently, the p-value threshold is arbritarily set to discovery threshold of 0.1, however future pipeline iterations that use PRSice2 or other methods to select the optimal p-value threhsold may change this. The PRS snakefile will output sample polygenic risk scores in a file containig the microbial taxon name and .PRS0.1.profile suffix. 
 <br/>
+<br/>
+
 > **Note**
 > Before using the PRS pipeline, the user must have clean base data summary statistics. The user should also confirm that the genome build of the base summary statistics are the same between the base and target data. This can be done by searching a few SNP rsIDs in the base and target data in the [NIH database](https://www.ncbi.nlm.nih.gov/snp/) and comparing the chromosomal location of the base/target data SNPs with the NIH database GRCh38 and GRCh37 build chromosomal locations. 
+
 <br/>
+
 > **Warning**
 > Failure to run TargetQC pipeline may cause PRS pipeline mismatch repair R scripts to fail. 
 
