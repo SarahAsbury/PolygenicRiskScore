@@ -7,7 +7,7 @@ Snakemake is a workflow management system designed for bioinformatics analyses. 
 
 
 ## Pipeline Overview
-![Pipline overview flowchart](images/pipeline_overview)
+![Pipline overview flowchart](Images/pipeline_overview.png)
 
 **Orange** = Accessory files 
 **Pink** = Target data
