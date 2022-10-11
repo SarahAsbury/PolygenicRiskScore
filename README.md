@@ -97,6 +97,7 @@ Specific Snakefile rules require additional edits.
 > **Note**
 > If edits are executed in the given order, Find and Replace and be used. 
 
+<br/>
 
 ## Running Snakefiles
 
@@ -122,6 +123,8 @@ cat ~/SA/GWAS/Kurilshikov/heritability_files/heritable.taxa.names | parallel -j 
 - /home/fosterlab/SA/GWAS/prs/plink-prs-run2 should be replaced with the path for the plink-prs directory
 - ~/SA/GWAS/Kurilshikov/heritability_files/heritable.taxa.names should be replaced with the path to a file containing the names of all 25 heritable taxa (heritable.taxa.names file provided in PRS_Pipeline)
 - canbind-qc of canbind-qc-{}.PRS0.1.profile{} should be replaced with the new QC'ed target database prefix created in the TargetQC pipeline Rule: FinalizeQC
+
+<br/>
 
 ## PRS Sample Matrix
 Once polygenic risk scores have been calculated for all 25 taxa, a matrix can be created. An example is given below: 
