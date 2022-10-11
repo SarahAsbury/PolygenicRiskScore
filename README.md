@@ -24,9 +24,9 @@ Next, input the clean heritable mbGWAS base data summary statistics (provided se
 > Failure to run TargetQC pipeline may cause PRS pipeline mismatch repair R scripts to fail. 
 
 ## Dependencies
-Snakemake
-PLINK
-R
+Snakemake<br/>
+PLINK<br/>
+R<br/>
 
 ## Required Data and Files
 ### Data
