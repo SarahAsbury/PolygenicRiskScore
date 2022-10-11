@@ -52,12 +52,12 @@ R<br/>
 1. For all rules, **replace GRCh37-canbind-noqc** with the prefix of the input target database. It is suggested to retain the -noqc suffix to indicate these are the raw files. 
 2. For all rules, **replace GRCh37-canbind-qc** with the prefix of the input target database. It is suggested to retain the -qc suffix to indicate that these are files used in the qc pipeline. 
 
-Specific rules require additional edits. 
+Specific Snakefile rules require additional edits. 
 
-#### HeterozygosityFilter 
+#### Rule: HeterozygosityFilter 
 - Change **/home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37-run2** to the new directory containing the raw target data. This will need to be replaced for both the -f and -r flags.
 
-#### FinalizeQC
+#### Rule: FinalizeQC
 - Change **canbind-qc** after the --out flag to the name of the target database and provide indication that this is the final QCed target database.
 
 
