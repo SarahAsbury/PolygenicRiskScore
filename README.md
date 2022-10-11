@@ -51,6 +51,7 @@ R<br/>
 - [ ] FixMisMatchSNP R script
 - [ ] range_list text file
 <br/>
+
 ## TargetQC Pipeline Instructions
 ### Preparation 
 1. Create a new directory and add raw target data to the directory (e.g UKBiobank bed/bim/fam files)
@@ -70,6 +71,7 @@ Specific Snakefile rules require additional edits.
 - Change **canbind-qc** after the --out flag to the name of the target database. It is suggested this new name provides some indication that this is the final QCed target database.
 
 <br/>
+
 ## PRS Pipeline Instructions
 ### Preparation 
 1. Create a directory named plink-prs
