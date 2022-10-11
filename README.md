@@ -92,7 +92,7 @@ Specific Snakefile rules require additional edits.
 3. Replace **/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc** with the directory path for the plink-prs/PipelineFiles/bed directory. Additionally, replace canbind-qc wih the new prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
 4. Replace **/home/fosterlab/SA/GWAS/prs/plink-prs** with the directory path for the plink-prs directory. 
 
-**Note**
+> **Note**
 > If edits are executed in the given order, Find and Replace and be used. 
 
 
