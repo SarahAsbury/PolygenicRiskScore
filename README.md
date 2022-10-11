@@ -95,7 +95,7 @@ Specific Snakefile rules require additional edits.
 </br>
 
 > **Note**
-> If edits are executed in the given order, Find and Replace and be used. 
+> If edits are executed in the given order, Find and Replace should be able to be used. 
 
 <br/>
 
