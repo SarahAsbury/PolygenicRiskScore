@@ -29,10 +29,13 @@ Next, input the clean heritable mbGWAS base data summary statistics (provided se
 > **Warning**
 > Failure to run TargetQC pipeline may cause PRS pipeline mismatch repair R scripts to fail. 
 
+<br/>
+
 ## Dependencies
 Snakemake<br/>
 PLINK<br/>
 R<br/>
+<br/>
 
 ## Required Data and Files
 ### Data
@@ -47,7 +50,7 @@ R<br/>
 - [ ] PRS Pipeline Snakefile
 - [ ] FixMisMatchSNP R script
 - [ ] range_list text file
-
+<br/>
 ## TargetQC Pipeline Instructions
 ### Preparation 
 1. Create a new directory and add raw target data to the directory (e.g UKBiobank bed/bim/fam files)
@@ -66,7 +69,7 @@ Specific Snakefile rules require additional edits.
 #### Rule: FinalizeQC
 - Change **canbind-qc** after the --out flag to the name of the target database. It is suggested this new name provides some indication that this is the final QCed target database.
 
-
+<br/>
 ## PRS Pipeline Instructions
 ### Preparation 
 1. Create a directory named plink-prs
