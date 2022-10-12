@@ -8,6 +8,14 @@ rule gwasQC:
 	shell:
 		"plink --bfile GRCh37-canbind-noqc --maf 0.01 --hwe 1e-6 --geno 0.01 --mind 0.01 --write-snplist --make-just-fam --out GRCh37-canbind-qc"
 
+## Linkage Disequilibrium
+## Remove SNPs in LD > 0.25 
+rule LD: 
+	input: "GRCh37-canbind-qc.fam"
+	output: "GRCh37-canbind-qc.prune.in"
+	shell: "plink --bfile GRCh37-canbind-noqc --keep GRCh37-canbind-qc.fam --extract GRCh37-canbind-qc.snplist --indep-pairwise 200 50 0.25 --out GRCh37-canbind-qc"
+
+
 ## Heterozygosity I
 ## Identify sample SNP heterozygosity rate
 rule HeterozygosityCalculation:
@@ -16,7 +24,7 @@ rule HeterozygosityCalculation:
 	output:	
 		"GRCh37-canbind-qc.het"
 	shell:
-		"plink --bfile GRCh37-canbind-noqc --keep GRCh37-canbind-qc.fam --extract GRCh37-canbind-qc.snplist --het --out GRCh37-canbind-qc"
+		"plink --bfile GRCh37-canbind-noqc --keep GRCh37-canbind-qc.fam --extract GRCh37-canbind-qc.prune.in --het --out GRCh37-canbind-qc"
 
 ## Heterozygosity II
 ## Remove samples with high or low heterozygosity (high likelihood of DNA contamination)(remove >3 SD from mean F-coefficient - relatedeness meaasure)
@@ -41,9 +49,9 @@ rule DuplicatedSNPs:
 		"GRCh37-canbind-qc-nodup.snplist"
 	shell:
 		"""
-		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc.snplist --list-duplicate-vars suppress-first
+		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc.prune.in --list-duplicate-vars suppress-first
 		cut -f4 plink.dupvar | cut -f1 -d" " > Duplicates.Bylocation.list
-		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc.snplist --exclude Duplicates.Bylocation.list --write-snplist --out GRCh37-canbind-qc-nodup
+		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc.prune.in --exclude Duplicates.Bylocation.list --write-snplist --out GRCh37-canbind-qc-nodup
 		cut -f 2 GRCh37-canbind-noqc.bim | sort | uniq -d > Duplicates.ByID.list
 		plink --bfile GRCh37-canbind-noqc --keep {input} --extract GRCh37-canbind-qc-nodup.snplist --exclude Duplicates.ByID.list --write-snplist --out GRCh37-canbind-qc-nodup
 		"""
