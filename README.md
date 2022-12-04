@@ -60,7 +60,7 @@ R<br/>
 
 ### Edit Snakefile Rules
 **For all rules: **
-1.Replace **GRCh37-canbind-noqc** with the prefix of the input target database. It is suggested to retain the -noqc suffix to indicate these are the raw files. 
+1. Replace **GRCh37-canbind-noqc** with the prefix of the input target database. It is suggested to retain the -noqc suffix to indicate these are the raw files. 
 2. Replace **GRCh37-canbind-qc** with the prefix of the input target database. It is suggested to retain the -qc suffix to indicate that these are files used in the qc pipeline. 
 
 Specific Snakefile rules require additional edits. 
@@ -88,9 +88,10 @@ Specific Snakefile rules require additional edits.
 ### Edit Snakefile Rules 
 **For all rules:**
 1. Replace **/home/fosterlab/SA/GWAS/Kurilshikov/summarystats_clean/heritable** with the directory path for the cleaned base data summary statistics
-2. Replace **/home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37/final-qc/canbind-qc** with the directory of the target database. Additionally, replace canbind-qc wih the new prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
+2. Replace **/home/fosterlab/SA/GWAS/canbind/CBN_GWAS_files/GRCh37/final-qc/canbind-qc** with the directory of the target database. Additionally, replace canbind-qc wih the quality controlled PLINK file prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
 3. Replace **/home/fosterlab/SA/GWAS/prs/plink-prs/PipelineFiles/bed/canbind-qc** with the directory path for the plink-prs/PipelineFiles/bed directory. Additionally, replace canbind-qc wih the new prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
 4. Replace **/home/fosterlab/SA/GWAS/prs/plink-prs** with the directory path for the plink-prs directory. 
+5. Replace any remaining occurences of **canbind-qc** with the quality controlled PLINK file prefix created in the Rule: FinalizeQC step of the TargetQC pipeline. 
 
 </br>
 
@@ -135,3 +136,9 @@ find *.profile | xargs -I input awk 'NR!=1 {print "input", $0}' input | sed '1i 
 #### User Edits
 - /home/fosterlab/SA/GWAS/prs/plink-prs-run2 should be replaced with the path for the plink-prs directory
 - canbind-prs-run2.tsv should be replaced with the desired name of the PRS sample matrix.
+
+<br/> 
+
+# Version Notes
+0.0 Creation
+0.1 3DEC2022 SA added instructions to replace canbind-qc in PRS pipeline.
