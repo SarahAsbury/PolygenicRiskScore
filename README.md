@@ -96,7 +96,7 @@ Specific Snakefile rules require additional edits.
 </br>
 
 > **Note**
-> If edits are executed in the given order, Find and Replace should be able to be used. 
+> If edits are executed in the given order, Find and Replace can be used. 
 
 <br/>
 
@@ -141,4 +141,5 @@ find *.profile | xargs -I input awk 'NR!=1 {print "input", $0}' input | sed '1i 
 
 # Version Notes
 0.0 Creation
+
 0.1 3DEC2022 SA added instructions to replace canbind-qc in PRS pipeline.
