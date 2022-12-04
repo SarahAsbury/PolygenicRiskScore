@@ -59,7 +59,7 @@ R<br/>
 
 
 ### Edit Snakefile Rules
-**For all rules: **
+**For all rules:**
 1. Replace **GRCh37-canbind-noqc** with the prefix of the input target database. It is suggested to retain the -noqc suffix to indicate these are the raw files. 
 2. Replace **GRCh37-canbind-qc** with the prefix of the input target database. It is suggested to retain the -qc suffix to indicate that these are files used in the qc pipeline. 
 
