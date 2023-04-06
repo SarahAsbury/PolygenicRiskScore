@@ -23,7 +23,7 @@ rule LD:
 ## Identify sample SNP heterozygosity rate
 rule HeterozygosityCalculation:
 	input: 
-		"GRCh37-canbind-qc.fam"
+		"GRCh37-canbind-qc.prune.in"
 	output:	
 		"GRCh37-canbind-qc.het"
 	shell:
