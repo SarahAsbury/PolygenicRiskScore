@@ -11,16 +11,19 @@ rule gwasQC:
 ## Linkage Disequilibrium
 ## Remove SNPs in LD > 0.25 
 rule LD: 
-	input: "GRCh37-canbind-qc.fam"
-	output: "GRCh37-canbind-qc.prune.in"
-	shell: "plink --bfile GRCh37-canbind-noqc --keep GRCh37-canbind-qc.fam --extract GRCh37-canbind-qc.snplist --indep-pairwise 200 50 0.25 --out GRCh37-canbind-qc"
+	input: 
+		"GRCh37-canbind-qc.fam"
+	output: 
+		"GRCh37-canbind-qc.prune.in"
+	shell: 
+		"plink --bfile GRCh37-canbind-noqc --keep GRCh37-canbind-qc.fam --extract GRCh37-canbind-qc.snplist --indep-pairwise 200 50 0.25 --out GRCh37-canbind-qc"
 
 
 ## Heterozygosity I
 ## Identify sample SNP heterozygosity rate
 rule HeterozygosityCalculation:
 	input: 
-		"GRCh37-canbind-qc.fam"
+		"GRCh37-canbind-qc.prune.in"
 	output:	
 		"GRCh37-canbind-qc.het"
 	shell:
