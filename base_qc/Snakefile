@@ -1,0 +1,35 @@
+configfile: "/data/SA/GWAS/MDD_prs/mdd_howard_2019/base_qc/config.yaml"
+
+
+## Remove duplicates 
+rule RmDup:
+	input: 
+		config["input_dir"] + "/" +  config["base_data_fn"]
+	output:
+		"nodup_gwas.txt"
+	params: 
+		column_number = config["rsid_col"]
+	shell:
+		"awk '!seen[${params.column_number}]++' {input} > {output}"
+
+
+## Remove ambigious 
+rule RmAmbg: 
+	input: "nodup_gwas.txt"
+
+	output: "nodup_noambig_gwas.txt"
+
+	params: 
+		a1_col_number = config["a1_col"],
+		a2_col_number = config["a2_col"]
+
+	shell:
+		'''
+		awk '!(\
+		(${params.a1_col_number} == "a" && ${params.a2_col_number} == "t") ||\
+		(${params.a1_col_number} == "t" && ${params.a2_col_number} == "a") ||\
+		(${params.a1_col_number} == "g" && ${params.a2_col_number} == "c") ||\
+		(${params.a1_col_number} == "c" && ${params.a2_col_number} == "g")\
+		) {{print}}\
+		' {input} > {output}
+		'''

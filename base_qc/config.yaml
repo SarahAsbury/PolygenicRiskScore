@@ -1,0 +1,7 @@
+# directories + filenames
+input_dir: "/data/SA/GWAS/MDD_prs/mdd_howard_2019"
+base_data_fn: "PGC_UKB_23andMe_depression_10000.txt"
+# params
+rsid_col: 1
+a1_col: 2
+a2_col: 3
