@@ -1,0 +1,63 @@
+#prsice workflow v.7
+        #Purpose v.2: Test prsice pipeline on single taxa.
+                #v.2 Goal 1: Add covariate to prsice workflow
+                #v.2 Goal 2: Harmonize all inputs to derived from /data/SA/GWAS/D2K/D2K_GWAS/prsice/input folder
+        #Purpose v.3: Finalize pipeline to calculate final PRS for all 25 heritable taxa
+                #v.3 Goal 1: Adapt pipeline to handle multiple taxa input
+                #v.3 Goal 2: Set PRS permutation to 10,000 
+                #v.3 Goal 3: Change threads from 10 to 5. Taxa will be run in 3 parallel. Total usage: 15 cores. 
+        #Purpose v.4: Calculate tran-ancestral PRS using d2k-qc.covariate file 
+	#Purpose v.5: Adapt to canbind data
+		#v.3 Goal 1: Use canbind data as input
+		#v.3 Goal 2: Set missing phenotype to "1" for all 
+		#v.3 Goal 3: Only calculate PRS for p-value at given threshold
+		#v.3 Goal 4: Speed up PRS calculation by reducing permutation from 10,000 -> 10 (prsice p-value is meaningless without phenotype data)
+	#Purpose v.6: Change from sum -> average score. Use updated prsice results summary file. 
+	#Purpose v.7: Adjusted for D2K minus 16S data. Remove use of covariate file (does not affecting PRS calculation). 
+
+# Set PLINK phenotype
+# GWAS phenotype replaced with 1 for all samples 
+rule NoPhenoPlink:
+        input:
+                "../input/trad_minus16s_qc.bim"
+        output:
+                "../input/trad_minus16s_qc_nopheno.bim"
+        shell:
+                "plink --bfile ../input/trad_minus16s_qc --output-missing-phenotype 1 --out ../input/trad_minus16s_qc_nopheno --make-bed"
+
+#P-value Thresholds
+#Get p-value threshold from D2K prsice run
+rule TaxaThreshold:
+	input:
+		"../input/d2k_prsice_results_summary_8feb23.csv"
+	output: 
+		temp("../input/p_threshold_{taxa}.csv")
+	shell:
+		"csvcut -c 'taxa,Threshold' {input} | grep {wildcards.taxa} | csvcut -c 2 > {output}"
+
+
+#PRSice - trait
+rule PRSiceTest:
+        input:
+                pthreshold = "../input/p_threshold_{taxa}.csv",
+                plink = "../input/trad_minus16s_qc_nopheno.bim"
+        output:
+                "prs-{taxa}.prsice"
+        shell:
+                """
+		cat {input.pthreshold} | xargs -I % \
+                Rscript /data/SA/GWAS/D2K/D2K_GWAS/prsice/PRSice/PRSice.R \
+                        --dir /usr/local/lib/R/site-library \
+                        --prsice /data/SA/GWAS/D2K/D2K_GWAS/prsice/PRSice/bin/PRSice \
+                        --base /data/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{wildcards.taxa}.summary.txt.gz \
+                        --snp rsID --bp bp --A1 eff.allele --A2 ref.allele --stat beta --pvalue P.weightedSumZ \
+                        --target ../input/trad_minus16s_qc_nopheno \
+			--ignore-fid \
+                        --binary-target F --beta \
+                        --score avg \
+			--lower % --upper % --no-full --no-regress \
+                        --perm 10 --seed 20221210 \
+			--thread 5 \
+                        --out prs-{wildcards.taxa}
+                """
+

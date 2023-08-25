@@ -1,0 +1,68 @@
+#prsice workflow v.5
+	#Purpose v.2: Test prsice pipeline on single taxa.
+		#v.2 Goal 1: Add covariate to prsice workflow
+		#v.2 Goal 2: Harmonize all inputs to derived from /data/SA/GWAS/D2K/D2K_GWAS/prsice/input folder
+	#Purpose v.3: Finalize pipeline to calculate final PRS for all 25 heritable taxa
+		#v.3 Goal 1: Adapt pipeline to handle multiple taxa input
+		#v.3 Goal 2: Set PRS permutation to 10,000 
+		#v.3 Goal 3: Change threads from 10 to 5. Taxa will be run in 3 parallel. Total usage: 15 cores. 
+	#Purpose v.4: Calculate tran-ancestral PRS using d2k-qc.covariate file 
+	#Purpose v.5: Change score type from sum to avg
+
+# Set PLINK phenotype
+# GWAS phenotype replaced with missing (NA) 
+rule NoPhenoPlink:
+        input:
+                "../input/d2k-qc.bim"
+        output:
+                "../input/d2k-qc-nopheno.bim"
+        shell:
+                "plink --bfile ../input/d2k-qc --output-missing-phenotype NA --out ../input/d2k-qc-nopheno --make-bed"
+
+
+# Phenotype File I
+# Convert space-separated tsv to csv for easier data management
+# Temporoary file output 
+rule PhenotypeFileI:
+        input:
+                "../input/taxonomy_table_log_prsice.txt"
+        output:
+                temp("../input/{taxa}-pheno-pre.csv")
+        shell:
+                "sed -e 's/\s\+/,/g' {input} > {output}"
+
+# Phenotype File II 
+# Cut phenotype file to IID and relevant trait columns only 
+rule PhenotypeFileII:
+        input:
+                file = "../input/{taxa}-pheno-pre.csv"
+        output:
+                temp("../input/{taxa}-pheno.txt")
+        shell:
+                "csvcut -c IID,genus.{wildcards.taxa} {input.file} | sed 's/,/ /g' > {output}"
+
+
+#PRSice - trait + covar
+rule PRSiceTest:
+        input:
+                phenotype = "../input/{taxa}-pheno.txt",
+                plink = "../input/d2k-qc-nopheno.bim"
+        output:
+                "prs-{taxa}.best"
+        shell:
+                """
+                Rscript /data/SA/GWAS/D2K/D2K_GWAS/prsice/PRSice/PRSice.R \
+                        --dir  /usr/local/lib/R/site-library \
+                        --prsice /data/SA/GWAS/D2K/D2K_GWAS/prsice/PRSice/bin/PRSice \
+                        --ignore-fid \
+			--base /data/SA/GWAS/Kurilshikov/summarystats_clean/heritable/noambig.nodup.genus.{wildcards.taxa}.summary.txt.gz \
+                        --snp rsID --bp bp --A1 eff.allele --A2 ref.allele --stat beta --pvalue P.weightedSumZ \
+                        --target ../input/d2k-qc-nopheno \
+                        --binary-target F --beta \
+                        --cov ../input/d2k-qc.covariate \
+                        --pheno {input.phenotype} --pheno-col genus.{wildcards.taxa} \
+			--score avg \
+                        --perm 10000 --seed 20221210 \
+                        --thread 5 \
+                        --out prs-{wildcards.taxa}
+                """
