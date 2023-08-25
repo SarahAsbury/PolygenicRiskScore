@@ -73,7 +73,7 @@ Specific Snakefile rules require additional edits.
 
 <br/>
 
-## PRS Pipeline Instructions
+## PLINK PRS Pipeline Instructions
 ### Preparation 
 1. Create a directory named plink-prs
 2. Add the PRS pipeline Snakefile and FixMisMatchSNP.R to plink-prs 
